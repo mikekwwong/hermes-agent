@@ -17,4 +17,6 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          # 增加設定以略過大型檔案檢查並強制推送
+          git config --global http.postBuffer 524288000
           git push --force https://mikekwwong:$HF_TOKEN@huggingface.co/spaces/mikekwwong/Hermes_AI main
