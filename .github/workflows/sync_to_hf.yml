@@ -2,7 +2,7 @@ name: Sync to Hugging Face hub
 on:
   push:
     branches: [main]
-  force_push: true
+  # 移除原本錯誤的 force_push 位置
 
 jobs:
   sync-to-hub:
@@ -16,9 +16,7 @@ jobs:
 
       - name: Push to hub
         env:
-          # 這裡引用妳剛才在 GitHub Settings 設定的 Secret
-          # 外部的人只會看到這行變數代稱，看不到實際 Token
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 替換為妳自己的 HF 用戶名和 Space 名稱
+          # 這裡使用了正確的變數帶入格式
           git push --force https://mikekwwong:$HF_TOKEN@huggingface.co/spaces/mikekwwong/Hermes_AI main
