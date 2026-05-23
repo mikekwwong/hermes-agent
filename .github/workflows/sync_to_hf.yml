@@ -2,7 +2,6 @@ name: Sync to Hugging Face hub
 on:
   push:
     branches: [main]
-  # 移除原本錯誤的 force_push 位置
 
 jobs:
   sync-to-hub:
@@ -18,4 +17,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git push --force https://mikekwwong:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/mikekwwong/Hermes_AI main
+          git push --force https://mikekwwong:$HF_TOKEN@huggingface.co/spaces/mikekwwong/Hermes_AI main
