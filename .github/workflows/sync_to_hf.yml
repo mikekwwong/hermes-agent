@@ -18,5 +18,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 這裡使用了正確的變數帶入格式
-          git push --force https://mikekwwong:$HF_TOKEN@huggingface.co/spaces/mikekwwong/Hermes_AI main
+          git push --force https://mikekwwong:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/mikekwwong/Hermes_AI main
