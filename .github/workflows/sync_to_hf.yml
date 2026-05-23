@@ -11,24 +11,22 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          # 這裡不啟用 lfs: true，因為我們要主動剔除大檔案以符合空間限制
-          lfs: false
 
       - name: Force Clean Push
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. 刪除導致報錯的大型圖片與文件資料夾
-          rm -rf website/ static/ infographic/ assets/ landingpage/
+          # 徹底移除所有非程式碼的大型素材資料夾
+          rm -rf website/ static/ infographic/ assets/ landingpage/ docker/
           
-          # 2. 設定 Git 身份
+          # 設定臨時 Git 身份
           git config --global user.email "bot@github.com"
           git config --global user.name "Sync Bot"
           
-          # 3. 建立一個乾淨的提交紀錄
+          # 提交這個輕量化變更 (僅限於此運行環境)
           git add .
-          git commit -m "Deploy: clean build without large assets" || echo "No changes"
+          git commit -m "Deploy: optimized sync" || echo "No changes"
           
-          # 4. 使用強行推送覆蓋 Hugging Face 端的歷史紀錄
-          # 這樣可以防止舊的大檔案物件佔用 Space 的儲存配額
+          # 推送到 Hugging Face 
+          # 請確保 mikekwwong/Hermes_AI 這個 Space 已經建立且為 Docker 類型
           git push --force https://mikekwwong:$HF_TOKEN@huggingface.co/spaces/mikekwwong/Hermes_AI main
