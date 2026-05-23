@@ -17,6 +17,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 增加設定以略過大型檔案檢查並強制推送
+          # 增加快取緩衝區以應對大型檔案推送
           git config --global http.postBuffer 524288000
+          # 強制推送程式碼，這會覆蓋 Space 端的內容
           git push --force https://mikekwwong:$HF_TOKEN@huggingface.co/spaces/mikekwwong/Hermes_AI main
