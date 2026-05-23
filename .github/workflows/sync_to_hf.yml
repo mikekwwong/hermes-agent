@@ -7,16 +7,22 @@ on:
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0      # 必須 fetch 完整歷史
-          lfs: true           # 改成 true
+          fetch-depth: 0
+          lfs: true
 
-      - name: Push to hub
+      - name: Setup Git LFS
+        run: |
+          git lfs install
+          git lfs pull
+
+      - name: Push to HF
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git config --global http.postBuffer 524288000
-          git push --force https://mikekwwong:${HF_TOKEN}@huggingface.co/spaces/mikekwwong/Hermes_AI main
+          git remote add space https://mikekwwong:${HF_TOKEN}@huggingface.co/spaces/mikekwwong/Hermes_AI
+          git push --force space main
