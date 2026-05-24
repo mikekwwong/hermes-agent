@@ -107,5 +107,5 @@ ENV PATH="/opt/data/.local/bin:${PATH}"
 RUN mkdir -p /opt/data
 VOLUME [ "/opt/data" ]
 
-# 使用 tini 作為 init 進程啟動腳本
-ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "/opt/hermes/docker/entrypoint.sh" ]
+# 使用絕對路徑並加上 gateway 參數與必要的網路設定
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/hermes/.venv/bin/hermes", "gateway", "--port", "7860", "--host", "0.0.0.0"]
