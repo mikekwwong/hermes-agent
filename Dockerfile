@@ -91,7 +91,7 @@ RUN cd web && npm run build && \
 # ---------- Permissions ----------
 USER root
 
-# 這裡增加一行，確保 entrypoint.sh 具備執行權限
+# 確保 entrypoint.sh 具備執行權限
 RUN chmod +x /opt/hermes/docker/entrypoint.sh
 
 RUN chmod -R a+rX /opt/hermes && \
@@ -107,6 +107,12 @@ ENV PATH="/opt/data/.local/bin:${PATH}"
 RUN mkdir -p /opt/data
 VOLUME [ "/opt/data" ]
 
-# 使用絕對路徑並加上 gateway 參數與必要的網路設定
-# 加入 "run" 指令，並修正參數格式
-ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/hermes/.venv/bin/hermes", "gateway", "run", "--port", "7860", "--host", "0.0.0.0"]
+# ---------- 方案一：使用环境变量配置端口 ----------
+# 设置环境变量（如果 hermes 支持的话）
+ENV HERMES_PORT=7860
+ENV HERMES_HOST=0.0.0.0
+ENV GATEWAY_PORT=7860
+ENV GATEWAY_HOST=0.0.0.0
+
+# 移除 --port 和 --host 参数，只保留 gateway run
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/hermes/.venv/bin/hermes", "gateway", "run"]
