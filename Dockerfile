@@ -91,28 +91,26 @@ RUN cd web && npm run build && \
 # ---------- Permissions ----------
 USER root
 
-# 確保 entrypoint.sh 具備執行權限
 RUN chmod +x /opt/hermes/docker/entrypoint.sh
 
 RUN chmod -R a+rX /opt/hermes && \
     chown -R hermes:hermes /opt/hermes/.venv /opt/hermes/ui-tui /opt/hermes/node_modules
 
-# ---------- Link hermes-agent itself (editable) ----------
 RUN uv pip install --no-cache-dir --no-deps -e "."
 
-# ---------- Runtime ----------
+# 创建启动脚本
+RUN echo '#!/bin/bash\n\
+export HERMES_HOME=/opt/data\n\
+export GATEWAY_TOKEN=${GATEWAY_TOKEN:-""}\n\
+if [ -z "$GATEWAY_TOKEN" ]; then\n\
+    echo "ERROR: GATEWAY_TOKEN is not set!"\n\
+    exit 1\n\
+fi\n\
+exec su - hermes -c "/opt/hermes/.venv/bin/hermes gateway run"' > /start.sh && chmod +x /start.sh
+
 ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
 ENV HERMES_HOME=/opt/data
-ENV PATH="/opt/data/.local/bin:${PATH}"
-RUN mkdir -p /opt/data
+RUN mkdir -p /opt/data && chown -R hermes:hermes /opt/data
 VOLUME [ "/opt/data" ]
 
-# ---------- 方案一：使用环境变量配置端口 ----------
-# 设置环境变量（如果 hermes 支持的话）
-ENV HERMES_PORT=7860
-ENV HERMES_HOST=0.0.0.0
-ENV GATEWAY_PORT=7860
-ENV GATEWAY_HOST=0.0.0.0
-
-# 移除 --port 和 --host 参数，只保留 gateway run
-ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/hermes/.venv/bin/hermes", "gateway", "run"]
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/start.sh"]
