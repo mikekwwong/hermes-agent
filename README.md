@@ -1,3 +1,13 @@
+---
+title: Hermes_Agent
+emoji: 🧠
+colorFrom: purple
+colorTo: indigo
+sdk: docker
+sdk_version: "3.10"
+app_file: app.py
+pinned: false
+---
 <p align="center">
   <img src="assets/banner.png" alt="Hermes Agent" width="100%">
 </p>
