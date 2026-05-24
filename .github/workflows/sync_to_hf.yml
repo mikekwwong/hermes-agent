@@ -1,32 +1,20 @@
 name: Sync to Hugging Face Hub
+
 on:
   push:
-    branches: [main]
+    branches: [ main ]  # 监听 main 分支的推送
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Force Clean Push
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          # 徹底移除所有非程式碼的大型素材資料夾
-          rm -rf website/ static/ infographic/ assets/ landingpage/ docker/
-          
-          # 設定臨時 Git 身份
-          git config --global user.email "bot@github.com"
-          git config --global user.name "Sync Bot"
-          
-          # 提交這個輕量化變更 (僅限於此運行環境)
-          git add .
-          git commit -m "Deploy: optimized sync" || echo "No changes"
-          
-          # 推送到 Hugging Face 
-          # 請確保 mikekwwong/Hermes_AI 這個 Space 已經建立且為 Docker 類型
-          git push --force https://mikekwwong:$HF_TOKEN@huggingface.co/spaces/mikekwwong/Hermes_AI main
+          lfs: true    # 确保大文件也被正确拉取
+      - name: Push to Hugging Face Space
+        uses: huggingface/hub-sync@v0.1.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: mikekwwong/Hermes_AI # 需替换
+          hf_token: ${{ secrets.HF_TOKEN }}
