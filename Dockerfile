@@ -89,26 +89,15 @@ RUN cd web && npm run build && \
     cd ../ui-tui && npm run build
 
 # ---------- Permissions ----------
-# Make install dir world-readable so any HERMES_UID can read it at runtime.
-# The venv needs to be traversable too.
-# node_modules trees additionally need to be writable by the hermes user
-# so the runtime `npm install` triggered by _tui_need_npm_install() in
-# hermes_cli/main.py succeeds (see #18800). /opt/hermes/web is build-time
-# only (HERMES_WEB_DIST points at hermes_cli/web_dist) and is intentionally
-# not chowned here.
-# The .venv MUST remain hermes-writable so lazy_deps.py can install
-# remaining optional platform packages and future pin bumps at first use.
-# Without this, `uv pip install` fails with EACCES and adapters silently
-# fail to load.  See tools/lazy_deps.py.
 USER root
+
+# 這裡增加一行，確保 entrypoint.sh 具備執行權限
+RUN chmod +x /opt/hermes/docker/entrypoint.sh
+
 RUN chmod -R a+rX /opt/hermes && \
     chown -R hermes:hermes /opt/hermes/.venv /opt/hermes/ui-tui /opt/hermes/node_modules
-# Start as root so the entrypoint can usermod/groupmod + gosu.
-# If HERMES_UID is unset, the entrypoint drops to the default hermes user (10000).
 
 # ---------- Link hermes-agent itself (editable) ----------
-# Deps are already installed in the cached layer above; `--no-deps` makes
-# this a fast (~1s) egg-link creation with no resolution or downloads.
 RUN uv pip install --no-cache-dir --no-deps -e "."
 
 # ---------- Runtime ----------
@@ -117,4 +106,6 @@ ENV HERMES_HOME=/opt/data
 ENV PATH="/opt/data/.local/bin:${PATH}"
 RUN mkdir -p /opt/data
 VOLUME [ "/opt/data" ]
+
+# 使用 tini 作為 init 進程啟動腳本
 ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "/opt/hermes/docker/entrypoint.sh" ]
