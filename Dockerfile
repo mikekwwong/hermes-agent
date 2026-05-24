@@ -108,5 +108,4 @@ RUN mkdir -p /opt/data
 VOLUME [ "/opt/data" ]
 
 # 使用 tini 作為 init 進程啟動腳本
-# 刪除原本那行，改為下面這行
-ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "hermes", "gateway", "--port", "7860", "--host", "0.0.0.0" ]
+ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "/opt/hermes/docker/entrypoint.sh" ]
