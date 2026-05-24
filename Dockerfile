@@ -108,4 +108,5 @@ RUN mkdir -p /opt/data
 VOLUME [ "/opt/data" ]
 
 # 使用絕對路徑並加上 gateway 參數與必要的網路設定
-ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/hermes/.venv/bin/hermes", "gateway", "--port", "7860", "--host", "0.0.0.0"]
+# 加入 "run" 指令，並修正參數格式
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/hermes/.venv/bin/hermes", "gateway", "run", "--port", "7860", "--host", "0.0.0.0"]
