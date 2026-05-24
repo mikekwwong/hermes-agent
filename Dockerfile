@@ -98,19 +98,43 @@ RUN chmod -R a+rX /opt/hermes && \
 
 RUN uv pip install --no-cache-dir --no-deps -e "."
 
-# 创建启动脚本
+# 创建启动脚本（修改版：添加 Telegram 支持和端口绑定）
 RUN echo '#!/bin/bash\n\
+# Telegram 配置\n\
+export TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-""}\n\
+export TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-""}\n\
+\n\
+# 基础配置\n\
 export HERMES_HOME=/opt/data\n\
 export GATEWAY_TOKEN=${GATEWAY_TOKEN:-""}\n\
+export PORT=${PORT:-7860}\n\
+\n\
+# 允许开放访问（测试用）\n\
+export GATEWAY_ALLOW_ALL_USERS=${GATEWAY_ALLOW_ALL_USERS:-"true"}\n\
+\n\
 if [ -z "$GATEWAY_TOKEN" ]; then\n\
     echo "ERROR: GATEWAY_TOKEN is not set!"\n\
     exit 1\n\
 fi\n\
-exec su - hermes -c "/opt/hermes/.venv/bin/hermes gateway run"' > /start.sh && chmod +x /start.sh
+\n\
+# 显示 Telegram 配置状态\n\
+if [ -n "$TELEGRAM_BOT_TOKEN" ]; then\n\
+    echo "✓ Telegram bot configured"\n\
+else\n\
+    echo "⚠ Telegram bot token not set, Telegram platform disabled"\n\
+fi\n\
+\n\
+echo "Starting Hermes Gateway on 0.0.0.0:${PORT}..."\n\
+\n\
+# 绑定到所有网络接口和正确的端口\n\
+exec su - hermes -c "/opt/hermes/.venv/bin/hermes gateway run --host 0.0.0.0 --port ${PORT}"' > /start.sh && chmod +x /start.sh
 
 ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
 ENV HERMES_HOME=/opt/data
 RUN mkdir -p /opt/data && chown -R hermes:hermes /opt/data
 VOLUME [ "/opt/data" ]
+
+# 暴露 Hugging Face 要求的端口
+EXPOSE 7860
 
 ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/start.sh"]
